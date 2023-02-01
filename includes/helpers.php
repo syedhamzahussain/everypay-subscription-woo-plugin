@@ -55,7 +55,7 @@ function eppg_recurring_order($order, $api_username, $api_key, $mode, $amount){
 	$data['email']                  = $current_user->user_email;
 	$data['nonce']                  = wp_create_nonce(time());
 	$data['timestamp']              = date("Y-m-d H:i:s",time());
-	$data['merchant_ip']            = $_SERVER['REMOTE_ADDR'];
+	$data['merchant_ip']            = $_SERVER['SERVER_ADDR'];
 	$data['token_agreement']        ='recurring';
 
 	
@@ -73,12 +73,16 @@ function eppg_recurring_order($order, $api_username, $api_key, $mode, $amount){
 	curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, true ); // this should be set to true in production
 	curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 	$responseData = curl_exec( $ch );
+
 	if ( curl_errno( $ch ) ) {
 		return curl_error( $ch );
 	}
 
 	curl_close( $ch );
 	$response = json_decode( $responseData );
+	$log = new WC_Logger();
+	$log_entry = print_r( $response, true );
+	$log->log( 'recurring-log-check', $log_entry );
 	return $response;
 }
 
