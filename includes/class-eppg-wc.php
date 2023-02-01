@@ -87,17 +87,17 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 			global $woocommerce;
 			$customer_order = wc_get_order( $order_id );
             
-            $url            = eppg_create_order( $order_id,  $this->get_return_url( $customer_order ), $api_username, $api_key, $gateway_options['ep_mode']);
+            $order_created            = eppg_create_order( $order_id,  $this->get_return_url( $customer_order ), $api_username, $api_key, $gateway_options['ep_mode']);
             
 			
-			if ( isset($url->payment_link) ) {
+			if ( isset($order_created->payment_link) ) {
 				if (WC_Subscriptions_Order::order_contains_subscription($order_id)) {
-					update_post_meta( $order_id, 'order_reference', $url->order_reference );
+					update_post_meta( $order_id, 'order_reference', $order_created->order_reference );
 					WC_Subscriptions_Manager::activate_subscriptions_for_order($customer_order);
 				}
 				return array(
 					'result'   => 'success',
-					'redirect' => $url->payment_link,
+					'redirect' => $order_created->payment_link,
 				);
 			} else {
 				wc_add_notice( 'Something Went Wrong.Please Try later.', 'error' );
@@ -111,9 +111,12 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 			$api_username = $gateway_options['ep_api_username'];
 			$api_key = $gateway_options['ep_api_key'];
 
-			$url            = eppg_recurring_order( $order, $api_username, $api_key, $gateway_options['ep_mode'], $amount_to_charge);
-			if ( $url ) {
-				
+			$order_completed            = eppg_recurring_order( $order, $api_username, $api_key, $gateway_options['ep_mode'], $amount_to_charge);
+			if ( isset($order_completed->payment_reference) ) {
+				$order_reference_id = $order->get_meta('order_reference');
+				$note = 'Subscription payment successfully paid for order reference id '.$order_reference_id.'. New payment reference id is : '. $order_completed->payment_reference;
+				$order->add_order_note( $note );
+				$order->payment_complete();
 			} else {
 				wc_add_notice( 'Something Went Wrong.Please Try later.', 'error' );
 				return;
