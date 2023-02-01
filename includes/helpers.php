@@ -53,7 +53,7 @@ function eppg_recurring_order($order, $api_username, $api_key, $mode, $amount){
 	$data['amount']                 = $amount;
 	$data['order_reference'] 		= $order->get_meta('order_reference');
 	$data['email']                  = $current_user->user_email;
-	$data['nonce']                  = wp_create_nonce();
+	$data['nonce']                  = wp_create_nonce(time());
 	$data['timestamp']              = date("Y-m-d H:i:s",time());
 	$data['merchant_ip']            = $_SERVER['REMOTE_ADDR'];
 	$data['token_agreement']        ='recurring';
@@ -85,6 +85,7 @@ function eppg_recurring_order($order, $api_username, $api_key, $mode, $amount){
 function eppg_create_order( $order_id, $return_url, $api_username, $api_key, $mode) {
 
 	global $woocommerce;
+    $data = [];
 	$customer_order = wc_get_order( $order_id );
 
 	$current_user = wp_get_current_user();
@@ -96,8 +97,8 @@ function eppg_create_order( $order_id, $return_url, $api_username, $api_key, $mo
 	$data['order_reference'] 	   = $order_id;
 	$data['currency']              = get_woocommerce_currency();
 	$data['email']                 = $current_user->user_email;
-	$data['nonce']                 = wp_create_nonce();
-	$data['timestamp']             = date("Y-m-d H:i:s",time());
+	$data['nonce']                 = wp_create_nonce(time());
+	$data['timestamp']             = date("Y-m-d") . "T" . date("H:i:s P"); 
 	$data['request_token']         = true;
 	$data['customer_ip']           = $_SERVER['REMOTE_ADDR'];
 	$data['locale']                = 'en';
@@ -111,7 +112,6 @@ function eppg_create_order( $order_id, $return_url, $api_username, $api_key, $mo
 	$data['token_agreement']       = (WC_Subscriptions_Order::order_contains_subscription( $order_id ) ? 'recurring' : 'unscheduled');
 	$data['customer_url']          = $return_url;
 
-	
 	if('TEST' === $mode){
 		$url = EPPG_TEST_GATEWAY_ENDPOINT.'/payments/oneoff';
 	}else{
@@ -126,6 +126,7 @@ function eppg_create_order( $order_id, $return_url, $api_username, $api_key, $mo
 	curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, true ); // this should be set to true in production
 	curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 	$responseData = curl_exec( $ch );
+    
 	if ( curl_errno( $ch ) ) {
 		return curl_error( $ch );
 	}
@@ -134,4 +135,3 @@ function eppg_create_order( $order_id, $return_url, $api_username, $api_key, $mo
 	$response = json_decode( $responseData );
 	return $response;
 }
-

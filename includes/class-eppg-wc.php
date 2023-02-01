@@ -25,11 +25,11 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 
 			global $woocommerce;
 
-			$this->id                 = 'easypay';
+			$this->id                 = 'everypay';
 			$this->supports = array( 'subscriptions', 'products', 'subscription_cancellation', 'subscription_reactivation' );
-			$this->method_title       = __( 'Easypay', 'eppg' );
-			$this->method_description = __( 'Payment Via Easypay', 'eppg' );
-			$this->title              = __( 'Easypay', 'eppg' );
+			$this->method_title       = __( 'everypay', 'eppg' );
+			$this->method_description = __( 'Payment Via everypay', 'eppg' );
+			$this->title              = __( 'everypay', 'eppg' );
 			$this->has_fields         = true;
 			$this->icon               = EPPG_ASSETS_DIR_URL . '/images/logo.jpeg';
 			$this->init_form_fields();
@@ -79,22 +79,25 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 		}
 
 		public function process_payment( $order_id ) {
-			$gateway_options = get_option( 'woocommerce_easypay_settings' );
+        	
+			$gateway_options = get_option( 'woocommerce_everypay_settings' );
 			$api_username = $gateway_options['ep_api_username'];
 			$api_key = $gateway_options['ep_api_key'];
 			
 			global $woocommerce;
 			$customer_order = wc_get_order( $order_id );
-			$url            = eppg_create_order( $order_id,  $this->get_return_url( $customer_order ), $api_username, $api_key, $gateway_options['ep_mode']);
-			if ( $url ) {
+            
+            $url            = eppg_create_order( $order_id,  $this->get_return_url( $customer_order ), $api_username, $api_key, $gateway_options['ep_mode']);
+            
+			
+			if ( isset($url->payment_link) ) {
 				if (WC_Subscriptions_Order::order_contains_subscription($order_id)) {
 					update_post_meta( $order_id, 'order_reference', $url->order_reference );
-					update_post_meta( $order_id, 'order_invoice', $url->payment_link );
 					WC_Subscriptions_Manager::activate_subscriptions_for_order($customer_order);
 				}
 				return array(
 					'result'   => 'success',
-					'redirect' => $url->customer_url,
+					'redirect' => $url->payment_link,
 				);
 			} else {
 				wc_add_notice( 'Something Went Wrong.Please Try later.', 'error' );
@@ -104,7 +107,7 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 		}
 
 		public function process_subscription_payment($amount_to_charge, $order){
-			$gateway_options = get_option( 'woocommerce_easypay_settings' );
+			$gateway_options = get_option( 'woocommerce_everypay_settings' );
 			$api_username = $gateway_options['ep_api_username'];
 			$api_key = $gateway_options['ep_api_key'];
 
