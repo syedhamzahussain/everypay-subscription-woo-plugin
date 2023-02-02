@@ -98,7 +98,7 @@ function eppg_create_order( $order_id, $return_url, $api_username, $api_key, $mo
 	$data['api_username']          = $api_username;
 	$data['account_name']          = 'EUR3D1';
 	$data['amount']                = $customer_order->get_total();
-	$data['order_reference'] 	   = $order_id;
+	$data['order_reference']       = $order_id.time();
 	$data['currency']              = get_woocommerce_currency();
 	$data['email']                 = $current_user->user_email;
 	$data['nonce']                 = wp_create_nonce(time());
