@@ -43,6 +43,7 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 			if ( is_admin() ) {
 				add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 			}
+			add_action( 'woocommerce_scheduled_subscription_payment_' . $this->id, [ $this, 'process_subscription_payment' ], 10, 2 );
 
 		}
 	
