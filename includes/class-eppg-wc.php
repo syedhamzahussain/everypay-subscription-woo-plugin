@@ -26,7 +26,17 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 			global $woocommerce;
 
 			$this->id                 = 'everypay';
-			$this->supports = array( 'subscriptions', 'products', 'subscription_cancellation', 'subscription_reactivation' );
+			
+            $this->supports = 
+			array( 
+            	'subscriptions',
+				'products',
+				'subscription_cancellation',
+				'subscription_reactivation',
+				'multiple_subscriptions',
+                'subscription_date_changes'
+			);
+            
 			$this->method_title       = __( 'everypay', 'eppg' );
 			$this->method_description = __( 'Payment Via everypay', 'eppg' );
 			$this->title              = __( 'everypay', 'eppg' );
@@ -46,7 +56,7 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 			add_action( 'woocommerce_scheduled_subscription_payment_' . $this->id, [ $this, 'eppg_process_subscription_payment' ], 10, 2 );
 
 		}
-	
+		
 
 		public function init_form_fields() {
 			$this->form_fields = array(
@@ -80,16 +90,16 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 		}
 
 		public function process_payment( $order_id ) {
-        	
+			
 			$gateway_options = get_option( 'woocommerce_everypay_settings' );
 			$api_username = $gateway_options['ep_api_username'];
 			$api_key = $gateway_options['ep_api_key'];
 			
 			global $woocommerce;
 			$customer_order = wc_get_order( $order_id );
-            
-            $order_created            = eppg_create_order( $order_id,  $this->get_return_url( $customer_order ), $api_username, $api_key, $gateway_options['ep_mode']);
-           
+			
+			$order_created            = eppg_create_order( $order_id,  $this->get_return_url( $customer_order ), $api_username, $api_key, $gateway_options['ep_mode']);
+			
 			
 			if ( isset($order_created->payment_link) ) {
 				if (WC_Subscriptions_Order::order_contains_subscription($order_id)) {
@@ -112,7 +122,7 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 			$api_username = $gateway_options['ep_api_username'];
 			$api_key = $gateway_options['ep_api_key'];
 			try{
-            	$order_completed            = eppg_recurring_order( $order, $api_username, $api_key, $gateway_options['ep_mode'], $amount_to_charge);
+				$order_completed            = eppg_recurring_order( $order, $api_username, $api_key, $gateway_options['ep_mode'], $amount_to_charge);
 				if ( isset($order_completed->payment_reference) ) {
 					$order_reference_id = $order->get_meta('order_reference');
 					$note = 'Subscription payment successfully paid for order reference id '.$order_reference_id.'. New payment reference id is : '. $order_completed->payment_reference;
@@ -122,11 +132,11 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 					$order->update_status( 'failed');
 					return;
 				}
-            }catch(\Exception $e){
-                $order->add_order_note( $note, 'Exception : '.$e->getMessage() );
-            	$order->update_status( 'failed' );
-            }
-            
+			}catch(\Exception $e){
+				$order->add_order_note( $note, 'Exception : '.$e->getMessage() );
+				$order->update_status( 'failed' );
+			}
+			
 			
 
 		}
