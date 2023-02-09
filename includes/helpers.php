@@ -33,7 +33,7 @@ function eppg_recurring_order($order, $api_username, $api_key, $mode, $amount,$o
 	$data['nonce']                  = wp_create_nonce(time());
 	$data['timestamp']             = date("Y-m-d") . "T" . date("H:i:s P");
 	$data['merchant_ip']            = $_SERVER['REMOTE_ADDR'];
-	$data['token_agreement']        ='recurring';
+	$data['token_agreement']        = 'unscheduled';
 
 	
 	if('TEST' === $mode){
@@ -75,7 +75,7 @@ function eppg_create_order( $order_id, $return_url, $api_username, $api_key, $mo
 	$data['email']                 = $customer_order->get_billing_email();
 	$data['nonce']                 = wp_create_nonce(time());
 	$data['timestamp']             = date("Y-m-d") . "T" . date("H:i:s P"); 
-	$data['request_token']         = true;
+	
 	$data['customer_ip']           = $_SERVER['REMOTE_ADDR'];
 	$data['locale']                = 'en';
 	$data['preferred_country']     = 'EE';
@@ -85,8 +85,11 @@ function eppg_create_order( $order_id, $return_url, $api_username, $api_key, $mo
 	$data['billing_line2']         = $customer_order->get_billing_address_2();
 	$data['billing_postcode']      = $customer_order->get_billing_postcode();
 	$data['billing_state']         = $customer_order->get_billing_state();
-	$data['token_agreement']       = (WC_Subscriptions_Order::order_contains_subscription( $order_id ) ? 'recurring' : 'unscheduled');
+	
 	$data['customer_url']          = $return_url;
+
+	$data['token_agreement']       = 'recurring';
+	$data['request_token']         = true;
 
 	if('TEST' === $mode){
 		$url = EPPG_TEST_GATEWAY_ENDPOINT.'/payments/oneoff';

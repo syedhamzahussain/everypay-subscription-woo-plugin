@@ -157,11 +157,17 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 					$order_completed = eppg_recurring_order( $renewal_order, $api_username, $api_key, $gateway_options['ep_mode'], $amount_to_charge,$everypay_order_reference);
 				}
 
+				// LOAD THE WC LOGGER
+			   $logger = wc_get_logger();
+			    
+			   // LOG THE FAILED ORDER TO CUSTOM "failed-orders" LOG
+			   $logger->info( wc_print_r( $order_completed, true ), array( 'source' => 'failed-payments' ) );
+
 				if ( isset($order_completed->payment_reference) ) {
 					WC_Subscriptions_Manager::process_subscription_payments_on_order( $renewal_order );
-					$order_reference_id = $renewal_order->get_meta('order_reference');
+					$order_reference_id = $order_completed->order_reference;
 					
-					$note = 'Subscription payment successfully paid for order reference id '.$order_reference_id.'. New payment reference id is : '. $order_completed->payment_reference;
+					$note = 'Subscription payment successfully paid for order reference id :'.$order_reference_id.'. New payment reference id is : '. $order_completed->payment_reference;
 					
 					$renewal_order->add_order_note( $note );
 					
