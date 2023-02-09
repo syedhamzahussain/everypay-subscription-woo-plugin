@@ -27,16 +27,16 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 
 			$this->id                 = 'everypay';
 			
-            $this->supports = 
+			$this->supports = 
 			array( 
-            	'subscriptions',
+				'subscriptions',
 				'products',
 				'subscription_cancellation',
 				'subscription_reactivation',
 				'multiple_subscriptions',
-                'subscription_date_changes'
+				'subscription_date_changes'
 			);
-            
+
 			$this->method_title       = __( 'everypay', 'eppg' );
 			$this->method_description = __( 'Payment Via everypay', 'eppg' );
 			$this->title              = __( 'everypay', 'eppg' );
@@ -53,7 +53,28 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 			if ( is_admin() ) {
 				add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 			}
-			add_action( 'woocommerce_scheduled_subscription_payment_' . $this->id, [ $this, 'eppg_process_subscription_payment' ], 10, 2 );
+			add_action( 'woocommerce_scheduled_subscription_payment_' . $this->id, [ $this, 'scheduled_subscription_payment' ], 10, 2 );
+
+		}
+
+		public function scheduled_subscription_payment( $amount_to_charge, $renewal_order ) {
+			$this->process_subscription_payment( $amount_to_charge, $renewal_order, true, false );
+		}
+
+
+		public function process_subscription_payment( $amount, $renewal_order, $retry = true, $previous_error = false ) {
+			$order_id = $renewal_order->get_id();
+			try {
+				
+				if( 'everypay' === $this->id ){
+					$this->eppg_process_subscription_payment( $order_id,$amount );
+				}
+			}
+			catch(\Exception $e){
+				$_order = wc_get_order($order_id);
+				$_order->add_order_note( $note, 'Error While trying subscription renewal : '.$e->getMessage() );
+				$_order->update_status( 'failed' );
+			}
 
 		}
 		
@@ -117,24 +138,41 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 
 		}
 
-		public function eppg_process_subscription_payment($amount_to_charge, $order){
+		public function eppg_process_subscription_payment( $order_id,$amount_to_charge ){
+			// getting Api settings
 			$gateway_options = get_option( 'woocommerce_everypay_settings' );
 			$api_username = $gateway_options['ep_api_username'];
 			$api_key = $gateway_options['ep_api_key'];
+
+			$renewal_order = wc_get_order( $order_id );
 			try{
-				$order_completed            = eppg_recurring_order( $order, $api_username, $api_key, $gateway_options['ep_mode'], $amount_to_charge);
+				$parent_id = $renewal_order->get_parent_id();
+				$parent_order = wc_get_order( $parent_id );
+
+				$everypay_order_reference = $parent_order->get_meta('order_reference');
+				if( !empty( $everypay_order_reference ) ){
+					$order_completed = eppg_recurring_order( $renewal_order, $api_username, $api_key, $gateway_options['ep_mode'], $amount_to_charge,$everypay_order_reference);
+				}
+
 				if ( isset($order_completed->payment_reference) ) {
-					$order_reference_id = $order->get_meta('order_reference');
+					WC_Subscriptions_Manager::process_subscription_payments_on_order( $renewal_order );
+					$order_reference_id = $renewal_order->get_meta('order_reference');
+					
 					$note = 'Subscription payment successfully paid for order reference id '.$order_reference_id.'. New payment reference id is : '. $order_completed->payment_reference;
-					$order->add_order_note( $note );
+					
+					$renewal_order->add_order_note( $note );
+					
 				} else {
-					wc_add_notice( 'Something Went Wrong.Please Try later.', 'error' );
-					$order->update_status( 'failed');
+					
+					$renewal_order->add_order_note( 'Error While trying subscription renewal : '.$e->getMessage() );
+					$renewal_order->update_status( 'failed' );
 					return;
 				}
+
 			}catch(\Exception $e){
-				$order->add_order_note( $note, 'Exception : '.$e->getMessage() );
-				$order->update_status( 'failed' );
+				
+				$renewal_order->add_order_note( 'Error While trying subscription renewal : '.$e->getMessage() );
+				$renewal_order->update_status( 'failed' );
 			}
 			
 			

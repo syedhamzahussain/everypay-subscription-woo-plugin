@@ -21,38 +21,15 @@ function eppg_is_woo_active() {
 	return false;
 }
 
-function eppg_get_token( $fp_merchant_id, $fp_merchant_secret ) {
-	$data['fp_merchant_id']     = $fp_merchant_id;
-	$data['fp_merchant_secret'] = $fp_merchant_secret;
-	$url                        = 'https://portal.frontpay.pk/api/create-token';
-	$ch                         = curl_init();
-	curl_setopt( $ch, CURLOPT_URL, $url );
-	curl_setopt( $ch, CURLOPT_POST, 1 );
-	curl_setopt( $ch, CURLOPT_POSTFIELDS, $data );
-	curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, true ); // this should be set to true in production
-	curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-	$responseData = curl_exec( $ch );
-	if ( curl_errno( $ch ) ) {
-		return curl_error( $ch );
-	}
 
-	curl_close( $ch );
+function eppg_recurring_order($order, $api_username, $api_key, $mode, $amount,$order_reference ){
 
-	$response = json_decode( $responseData );
-
-	return $response;
-}
-
-function eppg_recurring_order($order, $api_username, $api_key, $mode, $amount){
-
-	$current_user = wp_get_current_user();
-
-
+	
 	$data['api_username']           = $api_username;
 	$data['account_name']           = 'EUR3D1';
 	$data['amount']                 = $amount;
-	$data['order_reference'] 		= $order->get_meta('order_reference');
-	$data['email']                  = $current_user->user_email;
+	$data['order_reference'] 		= $order_reference;
+	$data['email']                  = $order->get_billing_email();
 	$data['nonce']                  = wp_create_nonce(time());
 	$data['timestamp']              = date("Y-m-d H:i:s",time());
 	$data['merchant_ip']            = $_SERVER['REMOTE_ADDR'];
@@ -93,15 +70,13 @@ function eppg_create_order( $order_id, $return_url, $api_username, $api_key, $mo
     $data = [];
 	$customer_order = wc_get_order( $order_id );
 
-	$current_user = wp_get_current_user();
-
 
 	$data['api_username']          = $api_username;
 	$data['account_name']          = 'EUR3D1';
 	$data['amount']                = $customer_order->get_total();
 	$data['order_reference'] 	   = $order_id.time();
 	$data['currency']              = get_woocommerce_currency();
-	$data['email']                 = $current_user->user_email;
+	$data['email']                 = $customer_order->get_billing_email();
 	$data['nonce']                 = wp_create_nonce(time());
 	$data['timestamp']             = date("Y-m-d") . "T" . date("H:i:s P"); 
 	$data['request_token']         = true;
