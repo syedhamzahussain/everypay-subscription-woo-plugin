@@ -28,11 +28,11 @@ function eppg_recurring_order($order, $api_username, $api_key, $mode, $amount,$o
 	$data['api_username']           = $api_username;
 	$data['account_name']           = 'EUR3D1';
 	$data['amount']                 = $amount;
-	$data['order_reference'] 		= $order_reference;
+	$data['order_reference'] 		= time();
 	$data['email']                  = $order->get_billing_email();
 	$data['nonce']                  = wp_create_nonce(time());
 	$data['timestamp']             = date("Y-m-d") . "T" . date("H:i:s P");
-	$data['merchant_ip']            = $_SERVER['REMOTE_ADDR'];
+	$data['merchant_ip']            = $_SERVER['SERVER_ADDR'];
 	$data['token_agreement']        = 'unscheduled';
 
 	
