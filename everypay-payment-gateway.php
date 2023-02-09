@@ -2,9 +2,9 @@
 /*
  * Plugin Name: Everypay Payment Gateway
  * Description: Provides you everypay Payment Gateway Integration with Woocommerce.
- * Author: Everypay
- * Author URI: https://www.everypay.pk
- * Version: 1.1.1.4
+ * Author: SolCoders
+ * Author URI: https://SolCoders.com
+ * Version: 1.1.1.0
  * Text Domain: EPPG
 */
 
