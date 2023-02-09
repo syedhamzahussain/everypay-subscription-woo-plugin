@@ -31,7 +31,7 @@ function eppg_recurring_order($order, $api_username, $api_key, $mode, $amount,$o
 	$data['order_reference'] 		= $order_reference;
 	$data['email']                  = $order->get_billing_email();
 	$data['nonce']                  = wp_create_nonce(time());
-	$data['timestamp']              = date("Y-m-d H:i:s",time());
+	$data['timestamp']             = date("Y-m-d") . "T" . date("H:i:s P");
 	$data['merchant_ip']            = $_SERVER['REMOTE_ADDR'];
 	$data['token_agreement']        ='recurring';
 

@@ -167,7 +167,7 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 					
 				} else {
 					
-					$renewal_order->add_order_note( 'Error While trying subscription renewal : '.$e->getMessage() );
+					$renewal_order->add_order_note( 'Error While trying subscription renewal' );
 					$renewal_order->update_status( 'failed' );
 					return;
 				}
