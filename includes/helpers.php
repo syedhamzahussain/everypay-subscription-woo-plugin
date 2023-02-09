@@ -50,10 +50,10 @@ function eppg_recurring_order($order, $api_username, $api_key, $mode, $amount,$o
 	curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, true ); // this should be set to true in production
 	curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 	$responseData = curl_exec( $ch );
-    
-    $log = new WC_Logger();
-    $log_entry = 'Exception Trace: ' . print_r( $responseData, true );
-    $log->log( 'new-woocommerce-recurring-log', $log_entry );
+	
+	$log = new WC_Logger();
+	$log_entry = 'Exception Trace: ' . print_r( $responseData, true );
+	$log->log( 'new-woocommerce-recurring-log', $log_entry );
 
 	if ( curl_errno( $ch ) ) {
 		return curl_error( $ch );
@@ -67,7 +67,7 @@ function eppg_recurring_order($order, $api_username, $api_key, $mode, $amount,$o
 function eppg_create_order( $order_id, $return_url, $api_username, $api_key, $mode) {
 
 	global $woocommerce;
-    $data = [];
+	$data = [];
 	$customer_order = wc_get_order( $order_id );
 
 
@@ -106,7 +106,7 @@ function eppg_create_order( $order_id, $return_url, $api_username, $api_key, $mo
 	curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, true ); // this should be set to true in production
 	curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 	$responseData = curl_exec( $ch );
-    
+	
 	if ( curl_errno( $ch ) ) {
 		return curl_error( $ch );
 	}
