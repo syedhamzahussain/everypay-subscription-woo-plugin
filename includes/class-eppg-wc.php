@@ -34,7 +34,8 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 				'subscription_cancellation',
 				'subscription_reactivation',
 				'multiple_subscriptions',
-				'subscription_date_changes'
+				'subscription_date_changes',
+				'subscription_suspension'
 			);
 
 			$this->method_title       = __( 'everypay', 'eppg' );
