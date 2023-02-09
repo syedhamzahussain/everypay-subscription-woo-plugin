@@ -125,6 +125,12 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 			
 			
 			if ( isset($order_created->payment_link) ) {
+				// LOAD THE WC LOGGER
+			   $logger = wc_get_logger();
+			    
+			   // LOG THE FAILED ORDER TO CUSTOM "failed-orders" LOG
+			   $logger->info( wc_print_r( $order_created, true ), array( 'source' => 'first-payments' ) );
+
 				if (WC_Subscriptions_Order::order_contains_subscription($order_id)) {
 					update_post_meta( $order_id, 'order_reference', $order_created->order_reference );
 					WC_Subscriptions_Manager::activate_subscriptions_for_order($customer_order);
