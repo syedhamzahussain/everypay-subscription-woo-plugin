@@ -51,10 +51,6 @@ function eppg_recurring_order($order, $api_username, $api_key, $mode, $amount,$o
 	curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 	$responseData = curl_exec( $ch );
 	
-	$log = new WC_Logger();
-	$log_entry = 'Exception Trace: ' . print_r( $responseData, true );
-	$log->log( 'new-woocommerce-recurring-log', $log_entry );
-
 	if ( curl_errno( $ch ) ) {
 		return curl_error( $ch );
 	}

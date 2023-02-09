@@ -65,6 +65,7 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 
 		public function process_subscription_payment( $amount, $renewal_order, $retry = true, $previous_error = false ) {
 			$order_id = $renewal_order->get_id();
+			
 			try {
 				
 				if( 'everypay' === $this->id ){
@@ -147,10 +148,11 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 
 			$renewal_order = wc_get_order( $order_id );
 			try{
-				$parent_id = $renewal_order->get_parent_id();
-				$parent_order = wc_get_order( $parent_id );
+				$parent_subscription_order_id =  get_post_meta( $order_id,'_subscription_renewal',true);
+				$parent_subscription_order = get_post( $parent_subscription_order_id );
+				$parent_id = $parent_subscription_order->post_parent;
 
-				$everypay_order_reference = $parent_order->get_meta('order_reference');
+				$everypay_order_reference = get_post_meta( $parent_id,'order_reference',true);
 				if( !empty( $everypay_order_reference ) ){
 					$order_completed = eppg_recurring_order( $renewal_order, $api_username, $api_key, $gateway_options['ep_mode'], $amount_to_charge,$everypay_order_reference);
 				}
