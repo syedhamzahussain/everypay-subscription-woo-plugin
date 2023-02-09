@@ -31,7 +31,7 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 			$this->method_description = __( 'Payment Via everypay', 'eppg' );
 			$this->title              = __( 'everypay', 'eppg' );
 			$this->has_fields         = true;
-			$this->icon               = EPPG_ASSETS_DIR_URL . '/images/logo.jpeg';
+			$this->icon               = EPPG_ASSETS_DIR_URL . '/images/logo.png';
 			$this->init_form_fields();
 			$this->init_settings();
 			$this->ipn_url = add_query_arg( 'wc-api', 'EPGG_WC', home_url( '/' ) );
@@ -89,7 +89,7 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 			$customer_order = wc_get_order( $order_id );
             
             $order_created            = eppg_create_order( $order_id,  $this->get_return_url( $customer_order ), $api_username, $api_key, $gateway_options['ep_mode']);
-            
+           
 			
 			if ( isset($order_created->payment_link) ) {
 				if (WC_Subscriptions_Order::order_contains_subscription($order_id)) {
