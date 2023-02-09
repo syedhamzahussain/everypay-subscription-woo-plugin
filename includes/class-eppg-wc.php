@@ -43,7 +43,7 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 			if ( is_admin() ) {
 				add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 			}
-			add_action( 'woocommerce_scheduled_subscription_payment_' . $this->id, [ $this, 'process_subscription_payment' ], 10, 2 );
+			add_action( 'woocommerce_scheduled_subscription_payment_' . $this->id, [ $this, 'eppg_process_subscription_payment' ], 10, 2 );
 
 		}
 	
@@ -107,21 +107,27 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 
 		}
 
-		public function process_subscription_payment($amount_to_charge, $order){
+		public function eppg_process_subscription_payment($amount_to_charge, $order){
 			$gateway_options = get_option( 'woocommerce_everypay_settings' );
 			$api_username = $gateway_options['ep_api_username'];
 			$api_key = $gateway_options['ep_api_key'];
-
-			$order_completed            = eppg_recurring_order( $order, $api_username, $api_key, $gateway_options['ep_mode'], $amount_to_charge);
-			if ( isset($order_completed->payment_reference) ) {
-				$order_reference_id = $order->get_meta('order_reference');
-				$note = 'Subscription payment successfully paid for order reference id '.$order_reference_id.'. New payment reference id is : '. $order_completed->payment_reference;
-				$order->add_order_note( $note );
-				$order->payment_complete();
-			} else {
-				wc_add_notice( 'Something Went Wrong.Please Try later.', 'error' );
-				return;
-			}
+			try{
+            	$order_completed            = eppg_recurring_order( $order, $api_username, $api_key, $gateway_options['ep_mode'], $amount_to_charge);
+				if ( isset($order_completed->payment_reference) ) {
+					$order_reference_id = $order->get_meta('order_reference');
+					$note = 'Subscription payment successfully paid for order reference id '.$order_reference_id.'. New payment reference id is : '. $order_completed->payment_reference;
+					$order->add_order_note( $note );
+				} else {
+					wc_add_notice( 'Something Went Wrong.Please Try later.', 'error' );
+					$order->update_status( 'failed');
+					return;
+				}
+            }catch(\Exception $e){
+                $order->add_order_note( $note, 'Exception : '.$e->getMessage() );
+            	$order->update_status( 'failed' );
+            }
+            
+			
 
 		}
 

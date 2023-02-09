@@ -55,7 +55,7 @@ function eppg_recurring_order($order, $api_username, $api_key, $mode, $amount){
 	$data['email']                  = $current_user->user_email;
 	$data['nonce']                  = wp_create_nonce(time());
 	$data['timestamp']              = date("Y-m-d H:i:s",time());
-	$data['merchant_ip']            = $_SERVER['SERVER_ADDR'];
+	$data['merchant_ip']            = $_SERVER['REMOTE_ADDR'];
 	$data['token_agreement']        ='recurring';
 
 	
@@ -73,6 +73,10 @@ function eppg_recurring_order($order, $api_username, $api_key, $mode, $amount){
 	curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, true ); // this should be set to true in production
 	curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 	$responseData = curl_exec( $ch );
+    
+    $log = new WC_Logger();
+    $log_entry = 'Exception Trace: ' . print_r( $responseData, true );
+    $log->log( 'new-woocommerce-recurring-log', $log_entry );
 
 	if ( curl_errno( $ch ) ) {
 		return curl_error( $ch );
@@ -80,9 +84,6 @@ function eppg_recurring_order($order, $api_username, $api_key, $mode, $amount){
 
 	curl_close( $ch );
 	$response = json_decode( $responseData );
-	$log = new WC_Logger();
-	$log_entry = print_r( $response, true );
-	$log->log( 'recurring-log-check', $log_entry );
 	return $response;
 }
 
@@ -98,7 +99,7 @@ function eppg_create_order( $order_id, $return_url, $api_username, $api_key, $mo
 	$data['api_username']          = $api_username;
 	$data['account_name']          = 'EUR3D1';
 	$data['amount']                = $customer_order->get_total();
-	$data['order_reference']       = $order_id.time();
+	$data['order_reference'] 	   = $order_id.time();
 	$data['currency']              = get_woocommerce_currency();
 	$data['email']                 = $current_user->user_email;
 	$data['nonce']                 = wp_create_nonce(time());
