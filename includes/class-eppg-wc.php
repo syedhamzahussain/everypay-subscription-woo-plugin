@@ -65,7 +65,7 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 
 		public function process_subscription_payment( $amount, $renewal_order, $retry = true, $previous_error = false ) {
 			$order_id = $renewal_order->get_id();
-			
+			//var_dump(1);die();
 			try {
 				
 				if( 'everypay' === $this->id ){
@@ -176,6 +176,7 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 					$note = 'Subscription payment successfully paid for order reference id :'.$order_reference_id.'. New payment reference id is : '. $order_completed->payment_reference;
 					
 					$renewal_order->add_order_note( $note );
+                    $renewal_order->payment_complete();
 					
 				} else {
 					
