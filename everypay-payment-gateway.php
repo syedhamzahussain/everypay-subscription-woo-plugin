@@ -5,7 +5,7 @@
  * Author: SolCoders
  * Author URI: https://SolCoders.com
  * Version: 1.1.1.0
- * Text Domain: EPPG
+ * Text Domain: eppg
 */
 
 if ( ! defined( 'ABSPATH' ) ) {

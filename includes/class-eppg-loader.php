@@ -20,12 +20,20 @@ if ( ! class_exists( 'EPPG_LOADER' ) ) {
 		 * Function Constructor.
 		 */
 		public function __construct() {
+			add_action( 'plugins_loaded', array( $this, 'load_plugin_textdomain' ) );
 			add_filter( 'woocommerce_payment_gateways', array( $this, 'add_everypay_gateway' ), 10, 1 );
 			add_action( 'plugins_loaded', array( $this, 'includes' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_assets' ) );
 			add_action( 'woocommerce_thankyou', array( $this, 'mark_payment_complete' ), 10, 1 );
 			add_filter( 'woocommerce_available_payment_gateways', array( $this, 'everypay_unset' ) );
 			add_action('admin_init',array( $this, 'admin_init' ),99 );
+		}
+
+		/**
+		 * Languages loaded.
+		 */
+		public function load_plugin_textdomain() {
+			load_plugin_textdomain( 'eppg', false, basename( EPPG_ABSPATH ) . '/languages/' );
 		}
 
 		public function admin_init(){

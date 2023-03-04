@@ -91,15 +91,15 @@ if ( ! class_exists( 'EPGG_WC' ) ) {
 				),
 				
 				'ep_api_username'     => array(
-					'title' => __( 'API Username', 'eshopspay' ),
+					'title' => __( 'API Username', 'eppg' ),
 					'type'  => 'text',
 				),
 				'ep_api_key' => array(
-					'title' => __( 'API Key', 'eshopspay' ),
+					'title' => __( 'API Key', 'eppg' ),
 					'type'  => 'password',
 				),
 				'ep_mode'            => array(
-					'title'   => __( 'Mode', 'eshopspay' ),
+					'title'   => __( 'Mode', 'eppg' ),
 					'type'    => 'select',
 					'options' => array(
 						'TEST' => 'TEST',
