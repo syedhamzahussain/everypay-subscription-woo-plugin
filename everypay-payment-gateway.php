@@ -4,7 +4,7 @@
  * Description: Provides you everypay Payment Gateway Integration with Woocommerce.
  * Author: SolCoders
  * Author URI: https://SolCoders.com
- * Version: 1.1.1.0
+ * Version: 1.1.1.1
  * Text Domain: eppg
 */
 
